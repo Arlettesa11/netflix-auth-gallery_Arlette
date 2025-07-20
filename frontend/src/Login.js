@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css'; // Asegúrate de que este import esté presente
 
-const Login = () => {
+const Login = ({ setToken }) => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -12,24 +12,25 @@ const Login = () => {
     e.preventDefault();
     const url = isRegistering
       ? 'http://localhost:8000/api/register/'
-      : 'http://localhost:8000/api/login/';
+      : 'http://localhost:8000/api/login/'; 
 
     try {
       const response = await axios.post(url, {
-        username,
-        password,
-      });
+      username,
+      password
+    });
 
-      if (isRegistering) {
-        setMessage('Registro exitoso. Ahora puedes iniciar sesión.');
-      } else {
-        setMessage('Inicio de sesión exitoso.');
-        console.log('Token recibido:', response.data);
-      }
-    } catch (error) {
-      setMessage('Hubo un error. Verifica tus datos.');
+    if (isRegistering) {
+      setMessage("Registro exitoso. Ahora puedes iniciar sesión.");
+    } else {
+      setMessage("Inicio de sesión exitoso.");
+      setToken(response.data.access); // 👈 Guarda el token en App.js
+      localStorage.setItem('access_token', response.data.access); // opcional si quieres persistencia
     }
-  };
+ } catch (error) {
+  setMessage("Hubo un error. Verifica tus datos.");
+}
+};
 
   return (
     <div>
@@ -53,7 +54,9 @@ const Login = () => {
             {isRegistering ? 'Registrarse' : 'Ingresar'}
           </button>
         </form>
+
         <p>{message}</p>
+        
         <p>
           {isRegistering ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?'}{' '}
           <span
